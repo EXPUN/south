@@ -1,0 +1,568 @@
+<html><head>
+<meta http-equiv="Content-type" content="text/html; charset=Utf-8">
+<title>DomainParser</title>
+
+<style type="text/css">
+/* 页面字体样式 */
+body, td, input, textarea {
+    font-family:宋体,Helvetica;
+    font-size:12px;
+}
+.title {
+	font-family:Helvetica;
+    overflow: hidden;
+    /* margin: 25px 0 15px 0; */
+    /* height: 40px; */
+    color: #0af;
+    text-shadow: 1px 1px 2px #eee;
+    font-weight: 700;
+    font-size: 24px;
+}
+</style>
+<script  src="https://mat1.gtimg.com/libs/jquery2/2.2.0/jquery2.min.js"></script>
+<link href="https://lib.sinaapp.com/js/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://lib.sinaapp.com/js/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div id="header" style="z-index:100;min-width:666px;box-shadow:0 0 5px #888;width:100%;height:30px;position:fixed;top:0;left:0px;BACKGROUND:#fbfbfb;">
+	<span class="title" style="display:inline; margin-left:8px;">DomainParser</span>
+	<input type="text" value="进度：" style="margin-left:20px;background:none;border:none;HEIGHT:14px; display:inline" readonly="" size="6">
+	<input type="text" id="adds1" value="" style="border: none; height: 14px; color: rgb(255, 0, 0); background: none; display:inline;" readonly="" size="40">
+	<input type="text" id="adds2" value="" style="background:none;border:none;HEIGHT:14px; display:inline;" readonly="" size="5">
+
+	<div id="tempco" style="display:inline"></div>
+</div>
+<br>
+<div class="panel panel-default" style="margin-left:8px;">
+<div class="panel-body">
+	<div id="" style="position:relative;top: 15px;opacity:0.75;">
+	<textarea rows="10" style="width:85%;top:50;" id="dnTextBox" onkeydown="if(event.ctrlKey&amp;&amp;event.keyCode==13)
+	{document.getElementById('submit').click();return false};">wenda.so.com
+www.docin.com
+www.uu898.com
+www.tianyancha.com
+club.xywy.com
+m.anjuke.com
+github.com
+haofs.com
+brand.vogue.com.cn
+</textarea>
+	<input type="button" value="查询" id="submit" onclick="dowork();">
+
+	<hr width="660" size="1" align="left" color="#5151A2" style="border:1px; dashed #gray; FILTER: alpha(opacity=100,finishopacity=0,style=3)">
+	<table width="92%" border="0" cellspacing="0" cellpadding="0" id="myTable" name="myTable" style="table-layout:fixed;word-break:break-all;">
+	  <thead><tr style="width:100%;background-color:C2C2C2;text-align:left;">
+		<td width="85">ID</td>
+		<td width="85">input</td>
+		<td>domain</td>
+	  </tr>
+	</thead>
+	<tbody id="insTable"></tbody>
+	</table>
+	</div>
+</div>
+</div>
+<script language="javascript" type="text/javascript"> //style="display:none"
+
+var totalpages = 2000;
+var xmlHttp;   // 创建XMLHTTPRequest对象
+function createXMLHTTPRequest(){
+	if(window.ActiveXObject){ // 判断是否支持ActiveX控件
+		xmlHttp = new ActiveXObject("Microsoft.XMLHTTP"); 
+		//alert("IE");//通过实例化ActiveXObject的一个新实例来创建XMLHTTPRequest对象
+	}
+	else if(window.XMLHttpRequest){ //判断是否把XMLHTTPRequest实现为一个本地javascript对象
+		xmlHttp = new XMLHttpRequest();
+		//alert("chorme"); //创建XMLHTTPRequest的一个实例（本地javascript对象）
+	}
+}
+
+function dowork()
+{	document.getElementById('submit').disabled = true;
+	//var rows = TB.children;while(rows.length) TB.deleteRow(0);
+	var text = dnTextBox.value;
+		//alert(text);
+		arr = text.split(/\r?\n/);
+		//document.getElementById("adds2").value="共"+arr.length+"条";
+	doShow(0);
+}
+
+function doShow(i)
+{
+	if (i>=arr.length) 
+	{
+		adds1.style.color ="#FF0000";
+		document.getElementById("adds1").value="Finished! //共"+arr.length+"条. "; //"+"作弊词"+spamcount+"条";
+		document.getElementById("tempco").innerHTML='<a href=# onclick="method5('+"myTable"+')">导出Excel</a>'; 
+		document.getElementById("tempco").style.display=" ";
+		document.getElementById('submit').disabled = false;
+		return;
+	}
+	
+	var ts = arr[i];//.replace(/^\s+|\s+$/g, "").split(/\t/);
+	if (ts){
+		document.getElementById("adds1").value="正在查询第"+(i+1)+"条 //共"+arr.length+"条.";  //"+"作弊词"+spamcount+"条";
+		//parser();
+		instb(i,ts);
+		 
+		jq_ajax(i,ts);
+		
+	}
+
+/* function parser()
+	{
+		if (s.length)
+		{
+			//alert("url="+url+"\n\reng="+eng);
+			//var url = "https://www.so.com/s?src=pingce&q="+encodeURIComponent(s);
+			//alert(url);
+			createXMLHTTPRequest();
+			xmlHttp.onreadystatechange = function(){if (xmlHttp.readyState == 4) writetb(); }                  //设置回调函数
+			//xmlHttp.timeout = 3000;
+			xmlHttp.open("GET", "http://test9.se.zzzc.qihoo.net:8360/Qsspingce/qsspingce/querydetail2/eng/ENGINE_ONLINE/id/"+s+"/location/0", false);
+			xmlHttp.send(null);
+			//xmlHttp.ontimeout = function(event){document.getElementById("adds1").value="请求超时";}
+		}
+	} */
+
+	window.setTimeout("doShow(" + (++i) + ")", 5);
+
+/* function writetb()
+	{
+		instb(i,s,querystr)
+		var locstr= xmlHttp.responseText.replace(/<style[\s\S]*?<\/style>|src=".*?"/g,"");
+		//alert(locstr); <script[\s\S]*?<\/script>|
+		var patt_engid=new RegExp(/pingcemark\s+=\s+'\{"ENGINE_360ANDROID":\{"id":"(\d+)",[^\}]*\}/);
+		var result_engid = locstr.match(patt_engid); 
+		//alert(result_engid[0]+"<br>"+result_engid[1]+"<br>"+result_engid[2]+"<br>"+result_engid[3]+"<br>"+result_engid[4]);
+		jq_ajax(i,s,querystr,result_engid[1]);
+		//console.log(result_engid[1]);
+	}	 */
+}
+
+function instb(i,ts)
+{
+		var tr = insTable.insertRow(-1)
+
+		var otd0 = document.createElement("td");
+			otd0.innerText = i+1;
+			tr.appendChild(otd0);
+			
+		var otd1 = document.createElement("td");
+			otd1.innerHTML = ts;
+			otd1.id ="ts"+i;
+			tr.appendChild(otd1);
+			
+		var otd2 = document.createElement("td");
+			otd2.innerText = "";
+			otd2.id ="is"+i;
+			tr.appendChild(otd2);
+			
+
+}	
+
+
+function jq_ajax(i,ts) {
+	var qstr="";  
+	var logstr="";
+	var parser = new DomainParser(jQuery.trim(ts));
+        parser.parse();
+	$("#is"+i).append(encodeURI(parser.getModifyName()));
+	/**jQuery.ajax({  
+		url: ts,
+		type: "GET", 
+		//data: {"content":ts},
+		//timeout:5000,
+		async : true,
+		success: function (data) {
+			//console.log("1");		
+			var wrappedObj = $("<code></code>").append($(data.replace(/<style[\s\S]*?<\/style>|src="[^"]*?"/g,"")));
+			qstr=decodeURIComponent($("a > input[value='点击下载']", wrappedObj).parent().attr("href"));
+			var titlestr = $("h3", wrappedObj).text();
+			//console.log("qstr="+qstr);
+				//totalpages = Number(data.data.totalpages);	
+			//var sourceurl =	data.data.content.original_source.url;
+				$("#is"+i).append(qstr+"|"+titlestr);
+			
+			//logstr = data.correct.length+"|"+d_display+"|"+d_score+"|"+d_force;
+			//$("#is"+i).append(data.correct.length);
+		},  
+		dataType: "html"
+		//dataType:"jsonp", 
+        //jsonp:"callback", 
+	});    **/
+}	
+
+
+var idTmr;  //toexcel
+        function  getExplorer() {  
+            var explorer = window.navigator.userAgent ;  
+            //ie  
+            if (explorer.indexOf("MSIE") >= 0) {  
+                return 'ie';  
+            }  
+            //firefox  
+            else if (explorer.indexOf("Firefox") >= 0) {  
+                return 'Firefox';  
+            }  
+            //Chrome  
+            else if(explorer.indexOf("Chrome") >= 0){  
+                return 'Chrome';  
+            }  
+            //Opera  
+            else if(explorer.indexOf("Opera") >= 0){  
+                return 'Opera';  
+            }  
+            //Safari  
+            else if(explorer.indexOf("Safari") >= 0){  
+                return 'Safari';  
+            }  
+        }  
+        function method5(tableid) {  
+            if(getExplorer()=='ie')  
+            {  
+                var curTbl = document.getElementById(tableid);  
+                var oXL = new ActiveXObject("Excel.Application");  
+                var oWB = oXL.Workbooks.Add();  
+                var xlsheet = oWB.Worksheets(1);  
+                var sel = document.body.createTextRange();  
+                sel.moveToElementText(curTbl);  
+                sel.select();  
+                sel.execCommand("Copy");  
+                xlsheet.Paste();  
+                oXL.Visible = true;  
+  
+                try {  
+                    var fname = oXL.Application.GetSaveAsFilename("Excel.xls", "Excel Spreadsheets (*.xls), *.xls");  
+                } catch (e) {  
+                    print("Nested catch caught " + e);  
+                } finally {  
+                    oWB.SaveAs(fname);  
+                    oWB.Close(savechanges = false);  
+                    oXL.Quit();  
+                    oXL = null;  
+                    idTmr = window.setInterval("Cleanup();", 1);  
+                }  
+  
+            }  
+            else  
+            {  
+                tableToExcel(tableid)  
+            }  
+        }  
+        function Cleanup() {  
+            window.clearInterval(idTmr);  
+            CollectGarbage();  
+        }  
+        var tableToExcel = (function() {  
+            var uri = 'data:application/vnd.ms-excel;base64,',  
+                    template = '<html><head><meta charset="UTF-8"></head><body><table>{table}</table></body></html>',  
+                    base64 = function(s) { return window.btoa(unescape(encodeURIComponent(s))) },  
+                    format = function(s, c) {  
+                        return s.replace(/{(\w+)}/g,  
+                                function(m, p) { return c[p]; }) }  
+            return function(table, name) {  
+                if (!table.nodeType) table = document.getElementById(table)  
+                var ctx = {worksheet: name || 'Worksheet', table: table.innerHTML}  
+                window.location.href = uri + base64(format(template, ctx))  
+            }  
+        }) ()
+</script>
+
+</body></html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+function DomainParser(domainName) {
+	var input = domainName;
+	var modifyName = domainName;
+	var b_error = false;
+	var message = "";
+
+	DomainParser.prototype.parse = function() {
+		if (!input || input.length==0) {
+			failMessage('请填写域名，例如：wanwang.com');
+			return;
+		}
+		var labels = parseLabels();
+		if (hasError()) {
+			return;
+		}
+		if (labels.length==1) {
+		    failMessage('域名格式错误。请输入正确的域名格式，以“.”进行区分 ');
+			return;
+		}
+		var topLabel = labels[labels.length-1];
+		if (isDigitLabels(topLabel)) {
+			failMessage("域名格式错误。请输入正确的域名格式，以“.”进行区分 ");
+			return ;
+		}
+		if (input.length>255) {
+		    failMessage('域名过长。每标号不得超过63个字符。由多个标号组成的完整域名总共不超过255个字符。');
+			return;
+		}
+		var topLevel = parseTopLevel(labels);
+		if (topLevel.labelIndex==0) {
+			failMessage(topLevel.name+'是域名后缀，不能查询。');
+			return;
+		}
+		var secondLevel = parseSecondLevel(labels,topLevel);
+		if (secondLevel.labelIndex!=0 && topLevel.recognized) {
+			modifyName = secondLevel.name +"."+ topLevel.name;
+		}
+	}
+	
+	DomainParser.prototype.getModifyName = function() {
+		return modifyName;
+	}
+	
+	function hasError() {
+		return b_error;
+	}
+	
+	DomainParser.prototype.hasError = hasError;
+	
+	DomainParser.prototype.getMessage = function() {
+		if (hasError()) {
+			return message;
+		}
+		else {
+			return null;
+		}
+	}
+	
+	function parseLabels() {
+		var labels = new Array();
+		var offset = 0;
+		while (offset< input.length) {
+			var label = parseLabel();
+			if (!hasError() && label) {
+				labels.push(label);
+			}
+			else {
+				return;
+			}
+		}
+		return labels;
+		
+		function parseLabel() {
+			var labelArr = new Array();
+			var start = offset;
+			while (offset < input.length) {
+	            var ch = input.charAt(offset);
+	            var invalid = false;
+	            if (start==offset && !isLetterOrDigit(ch)) {
+	            	invalid = true;
+	            }
+	            else if ((offset+1==input.length || input.charAt(offset+1)=='.') && !isLetterOrDigit(ch)) {
+	            	invalid = true;
+	            }
+	            else if (!isLabelChar(ch)){
+	            	invalid = true;
+	            }
+	            if (invalid) {
+	            	failMessage('格式错误。域名一般由英文字母、汉字、阿拉伯数字、"-"组成，用“.”分隔，且每段不能以“.”、"-”开头和结尾');
+	            	return;
+	            }
+	            else {
+	                labelArr.push(ch);
+	                offset++;
+	                if ((offset<input.length && input.charAt(offset)=='.') || (offset==input.length) ) {
+	                    if (offset<input.length && input.charAt(offset)=='.') {
+	                        offset++;
+	                    }
+	                    if (labelArr.length>63) {
+	                        failMessage('域名过长。每标号不得超过63个字符。由多个标号组成的完整域名总共不超过255个字符。');
+	                        return;
+	                    }
+	                    return labelArr.join("");
+	                }
+	            
+	            }
+	        }
+		}
+	}
+	
+	function isLabelChar(ch) {
+		if (ch.charCodeAt(0)<=127) {
+			if(　(ch>='A'&&ch<='Z')||(ch>='a'&&ch<='z') || (ch>='0'&&ch<='9') || (ch=='-') ) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			if ((ch.charCodeAt(0)>=0xFF00 && ch.charCodeAt(0)<=0xFFEF) ||
+				(ch.charCodeAt(0)>=0x3000 && ch.charCodeAt(0)<=0x303F) 
+			) {
+				return false;
+			}
+			else {
+				return true;
+			}
+		}
+	}
+	
+	function isLetterOrDigit(ch) {
+		if (ch.charCodeAt(0)<=127) {
+			if(　(ch>='A'&&ch<='Z')||(ch>='a'&&ch<='z') || (ch>='0'&&ch<='9') ) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			if ((ch.charCodeAt(0)>=0xFF00 && ch.charCodeAt(0)<=0xFFEF) || 
+				(ch.charCodeAt(0)>=0x3000 && ch.charCodeAt(0)<=0x303F) 
+				) {
+				return　false;
+			}
+			else {
+				return true;
+			}
+		}
+	}
+	
+	function isDigitLabels(label) {
+		var i = 0;
+		while (i<label.length) {
+			var ch = label.charAt(i);
+			if (!(ch>='0'&& ch<='9')) {
+				return false;
+			}
+			i++;
+		}
+		return true;
+	}
+	
+	function parseTopLevel(labels) {
+		var topLevelName = "";
+		var lowTopLevelName = "";
+		var topLevel;
+		var index;
+		if (labels.length>=2) {
+			topLevelName = labels[labels.length-2]+"."+labels[labels.length-1];
+			lowTopLevelName = topLevelName.toLowerCase();
+			for (index=0;index<tow_top_level.length;index++) {
+				if (lowTopLevelName==tow_top_level[index]) {
+					topLevel = new TopLevel(topLevelName,2,labels.length-2,true);
+					break;
+				}
+			}
+		}
+		if (!topLevel) {
+			topLevelName = labels[labels.length-1];
+			lowTopLevelName = topLevelName.toLowerCase();
+			for (index=0;index<one_top_level.length;index++) {
+				if (lowTopLevelName==one_top_level[index]) {
+					topLevel = new TopLevel(topLevelName,1,labels.length-1,true);
+					break;
+				}
+			}
+		}
+		if (!topLevel) {
+			topLevelName = labels[labels.length-1];
+			topLevel = new TopLevel(topLevelName,1,labels.length-1,false);
+		}
+		return topLevel;
+	}
+	function TopLevel(name,labelCount,labelIndex,recognized) {
+		this.name = name;
+		this.labelCount= labelCount;
+		this.labelIndex= labelIndex;
+		this.recognized = recognized;
+		return this;
+	}
+	
+	function parseSecondLevel(labels,topLevel) {
+		var secondLevel = new SecondLevel(labels[topLevel.labelIndex-1],1,topLevel.labelIndex-1);
+		return secondLevel;
+	}
+	
+	function SecondLevel(name,labelCount,labelIndex) {
+		this.name = name;
+		this.labelCount=labelCount;
+		this.labelIndex = labelIndex;
+		return this;
+	}
+	
+	function failMessage(msg) {
+		message = msg;
+		b_error = true;
+	}
+	
+	var one_top_level = ['ac','ad','ae','aero','af','ag','ai','al','am','an','ao','aq',
+	         		    'ar','arpa','as','asia','at','au','aw','ax','az','ba','bb','bd',
+	         		    'be','bf','bg','bh','bi','biz','bj','bl','bm','bn','bo','bq',
+	         		    'br','bs','bt','bv','bw','by','bz','ca','cat','cc','cd','cf',
+	         		    'cg','ch','ci','ck','cl','cm','cn','co','com','coop','cr','cu',
+	         		    'cv','cw','cx','cy','cz','de','dj','dk','dm','do','dz','ec',
+	         		    'edu','ee','eg','eh','er','es','et','eu','fi','fj','fk','fm',
+	         		    'fo','fr','ga','gb','gd','ge','gf','gg','gh','gi','gl','gm',
+	         		    'gn','gov','gp','gq','gr','gs','gt','gu','gw','gy','hk','hm',
+	         		    'hn','hr','ht','hu','id','ie','il','im','in','info','int',
+	         		    'io','iq','ir','is','it','je','jm','jo','jobs','jp','ke',
+	         		    'kg','kh','ki','km','kn','kp','kr','kw','ky','kz','la',
+	         		    'lb','lc','li','lk','lr','ls','lt','lu','lv','ly','ma','mc',
+	         		    'md','me','mf','mg','mh','mil','mk','ml','mm','mn','mo',
+	         		    'mobi','mp','mq','mr','ms','mt','mu','museum','mv','mw',
+	         		    'mx','my','mz','na','name','nc','ne','net','nf','ng',
+	         		    'ni','nl','no','np','nr','nu','nz','om','org','pa',
+	         		    'pe','pf','pg','ph','pk','pl','pm','pn','post','pr',
+	         		    'pro','ps','pt','pw','py','qa','re','ro','rs','ru',
+	         		    'rw','sa','sb','sc','sd','se','sg','sh','si','sj',
+	         		    'sk','sl','sm','sn','so','sr','ss','st','su','sv','sx',
+	         		    'sy','sz','tc','td','tel','tf','tg','th','tj','tk','tl',
+	         		    'tm','tn','to','tp','tr','travel','tt','tv','tw','tz',
+	         		    'ua','ug','uk','um','us','uy','uz','va','vc','ve','vg',
+	         		    'vi','vn','vu','wf','ws','中国','中國','香港','台湾','台灣',
+	         		    '新加坡','xxx','ye','yt','za','zm','zw','zw','xn--fiqs8s',
+	         		    'xn--fiqz9s','xn--j6w193g','xn--kprw13d','xn--kpry57d',
+	         		    'xn--yfro4i67o','公司','网络','網絡','xn--55qx5d','xn--io0a7i'];
+	var tow_top_level = ['ac.cn','com.cn','edu.cn','gov.cn','mil.cn','net.cn','org.cn','bj.cn',
+	         		    'sh.cn','tj.cn','cq.cn','he.cn','sx.cn','nm.cn','ln.cn','jl.cn',
+	         		    'hl.cn','js.cn','zj.cn','ah.cn','fj.cn','jx.cn','sd.cn','ha.cn',
+	         		    'hb.cn','hn.cn','gd.cn','gx.cn','hi.cn','sc.cn','gz.cn','yn.cn',
+	         		    'xz.cn','sn.cn','gs.cn','qh.cn','nx.cn','xj.cn','tw.cn','hk.cn',
+	         		    'mo.cn','com.af','net.af','org.af','com.ag','net.ag','org.ag','co.at',
+	         		    'or.at','com.bi','edu.bi','info.bi','mo.bi','or.bi','org.bi','com.br',
+	         		    'net.br','org.br','co.bz','com.bz','net.bz','org.bz','co.cm','com.cm',
+	         		    'net.cm','com.co','net.co','nom.co','ar.com','br.com','cn.com','de.com',
+	         		    'eu.com','gb.com','gr.com','hu.com','jpn.com','kr.com','no.com',
+	         		    'ru.com','se.com','uk.com','us.com','za.com','com.de','co.dm','com.ec',
+	         		    'fin.ec','info.ec','med.ec','net.ec','pro.ec','com.es','nom.es',
+	         		    'org.es','co.gg','net.gg','org.gg','co.gl','com.gl','edu.gl','net.gl',
+	         		    'org.gl','com.gr','co.gy','com.gy','net.gy','com.hk','edu.hk','gov.hk',
+	         		    'idv.hk','net.hk','org.hk','com.hn','net.hn','org.hn','adult.ht','com.ht',
+	         		    'info.ht','net.ht','org.ht','org.il','co.in','firm.in','gen.in','ind.in',
+	         		    'net.in','org.in','bz.it','co.it','co.je','net.je','org.je','com.ki',
+	         		    'net.ki','org.ki','co.kr','ne.kr','or.kr','pe.kr','re.kr','seoul.kr',
+	         		    'com.lc','net.lc','org.lc','co.mg','com.mg','net.mg','org.mg','ac.mu',
+	         		    'co.mu','com.mu','net.mu','org.mu','com.mx','gb.net','hu.net','jp.net',
+	         		    'se.net','uk.net','com.nf','net.nf','org.nf','co.nl','net.nz','org.nz',
+	         		    'ae.org','us.org','com.pe','net.pe','org.pe','com.ph','com.pk','net.pk',
+	         		    'org.pk','biz.pl','com.pl','info.pl','net.pl','org.pl','waw.pl','aaa.pro',
+	         		    'aca.pro','acct.pro','avocat.pro','bar.pro','cpa.pro','eng.pro','jur.pro',
+	         		    'law.pro','med.pro','recht.pro','com.ps','net.ps','org.ps','com.pt','edu.pt',
+	         		    'org.pt','com.ru','net.sb','org.sb','com.sc','net.sc','org.sc','com.sg',
+	         		    'com.so','net.so','org.so','club.tw','com.tw','ebiz.tw','game.tw','idv.tw',
+	         		    'org.tw','me.uk','org.uk','co.uz','com.uz','com.vc','net.vc','org.vc',
+	         		    'ac.vn','biz.vn','com.vn','edu.vn','gov.vn','health.vn','info.vn','int.vn',
+	         		    'name.vn','net.vn','org.vn','pro.vn'];
+	//https://whois.aliyun.com/js/domainparser.js
+}
+</script>
